@@ -30,19 +30,17 @@
       </a-space>
     </div>
 
-
     <!-- 图片列表 -->
     <a-list
       :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 }"
       :data-source="dataList"
-      :pagination="pagination"
       :loading="loading"
     >
       <template #renderItem="{ item: picture }">
         <a-list-item style="padding: 0">
           <!-- 单张图片 -->
           <a-card hoverable @click="doClickPicture(picture)">
-          <template #cover>
+            <template #cover>
               <img
                 style="height: 180px; object-fit: cover"
                 :alt="picture.name"
@@ -65,6 +63,18 @@
         </a-list-item>
       </template>
     </a-list>
+
+    <!-- 分页 -->
+    <div class="pagination" style="text-align: center;">
+      <a-pagination
+        v-model:current="pagination.current"
+        :total="pagination.total"
+        :page-size="searchParams.pageSize"
+        show-size-changer
+        show-quick-jumper
+        @change="handlePageChange"
+      />
+    </div>
   </div>
 </template>
 
@@ -72,7 +82,10 @@
 // 数据
 import { computed, onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
-import { listPictureTagCategoryUsingGet, listPictureVoByPageUsingPost } from '@/api/pictureController.ts'
+import {
+  listPictureTagCategoryUsingGet,
+  listPictureVoByPageUsingPost,
+} from '@/api/pictureController.ts'
 import { useRouter } from 'vue-router'
 
 const dataList = ref([])
@@ -91,7 +104,6 @@ const doClickPicture = (picture) => {
   })
 }
 
-
 // 获取标签和分类选项
 const getTagCategoryOptions = async () => {
   const res = await listPictureTagCategoryUsingGet()
@@ -103,7 +115,6 @@ const getTagCategoryOptions = async () => {
     message.error('加载分类标签失败，' + res.data.message)
   }
 }
-
 
 // 搜索条件
 const searchParams = reactive<API.PictureQueryRequest>({
@@ -159,13 +170,19 @@ const doSearch = () => {
   fetchData()
 }
 
+// 处理页码改变事件
+const handlePageChange = (page: number, pageSize: number) => {
+  searchParams.current = page
+  searchParams.pageSize = pageSize
+  fetchData()
+}
+
 
 // 页面加载时请求一次
 onMounted(() => {
   fetchData()
   getTagCategoryOptions()
 })
-
 </script>
 
 <style scoped>
@@ -176,5 +193,4 @@ onMounted(() => {
 #homePage .tag-bar {
   margin-bottom: 16px;
 }
-
 </style>
