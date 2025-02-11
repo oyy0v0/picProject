@@ -27,12 +27,15 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * 文件服务
+ * @deprecated 已废弃，改为使用 upload 包的模板方法优化
  * @author oyy0v0
  * @version 1.0.0
  * @create 2025/2/1 10:54
  */
 @Service
 @Slf4j
+@Deprecated
 public class FileManager {
 
     @Resource

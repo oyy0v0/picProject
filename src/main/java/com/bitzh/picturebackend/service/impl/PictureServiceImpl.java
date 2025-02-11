@@ -10,6 +10,9 @@ import com.bitzh.picturebackend.exception.BusinessException;
 import com.bitzh.picturebackend.exception.ErrorCode;
 import com.bitzh.picturebackend.exception.ThrowUtils;
 import com.bitzh.picturebackend.manager.FileManager;
+import com.bitzh.picturebackend.manager.upload.FilePictureUpload;
+import com.bitzh.picturebackend.manager.upload.PictureUploadTemplate;
+import com.bitzh.picturebackend.manager.upload.UrlPictureUpload;
 import com.bitzh.picturebackend.mapper.PictureMapper;
 import com.bitzh.picturebackend.model.dto.file.UploadPictureResult;
 import com.bitzh.picturebackend.model.dto.picture.PictureQueryRequest;
@@ -22,6 +25,7 @@ import com.bitzh.picturebackend.model.vo.PictureVO;
 import com.bitzh.picturebackend.model.vo.UserVO;
 import com.bitzh.picturebackend.service.PictureService;
 import com.bitzh.picturebackend.service.UserService;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,8 +53,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     @Resource
     private FileManager fileManager;
 
+    @Resource
+    private FilePictureUpload filePictureUpload;
+
+    @Resource
+    private UrlPictureUpload urlPictureUpload;
+
     @Override
-    public PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser) {
+    public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 用于判断是新增还是更新图片
         Long pictureId = null;
@@ -73,7 +83,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 上传图片，得到信息
         // 按照用户 id 划分目录
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
-        UploadPictureResult uploadPictureResult = fileManager.uploadPicture(multipartFile, uploadPathPrefix);
+
+        // 根据inputSource类型判断是文件还是url
+        PictureUploadTemplate pictureUploadTemplate = filePictureUpload;
+        if(inputSource instanceof String){
+            pictureUploadTemplate = urlPictureUpload;
+        }
+        UploadPictureResult uploadPictureResult = pictureUploadTemplate.uploadPicture(inputSource, uploadPathPrefix);
+
         // 构造要入库的图片信息
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
