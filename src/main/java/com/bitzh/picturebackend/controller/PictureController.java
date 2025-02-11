@@ -154,9 +154,9 @@ public class PictureController {
 
     /**
      * 根据 id 获取图片（封装类）
-     * @param id
-     * @param request
-     * @return
+     * @param id 图片 id
+     * @param request 请求
+     * @return 图片
      */
     @GetMapping("/get/vo")
     public BaseResponse<PictureVO> getPictureVOById(long id, HttpServletRequest request) {
@@ -170,8 +170,8 @@ public class PictureController {
 
     /**
      * 分页获取图片列表（仅管理员可用）
-     * @param pictureQueryRequest
-     * @return
+     * @param pictureQueryRequest 图片查询请求
+     * @return 分页图片列表
      */
     @PostMapping("/list/page")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
@@ -186,9 +186,9 @@ public class PictureController {
 
     /**
      * 分页获取图片列表（封装类）
-     * @param pictureQueryRequest
-     * @param request
-     * @return
+     * @param pictureQueryRequest 图片查询请求
+     * @param request 请求
+     * @return 分页图片列表
      */
     @PostMapping("/list/page/vo")
     public BaseResponse<Page<PictureVO>> listPictureVOByPage(@RequestBody PictureQueryRequest pictureQueryRequest,
@@ -209,9 +209,9 @@ public class PictureController {
 
     /**
      * 编辑图片（给用户使用）
-     * @param pictureEditRequest
-     * @param request
-     * @return
+     * @param pictureEditRequest 图片编辑请求
+     * @param request 请求
+     * @return 编辑结果
      */
     @PostMapping("/edit")
     public BaseResponse<Boolean> editPicture(@RequestBody PictureEditRequest pictureEditRequest, HttpServletRequest request) {
@@ -261,9 +261,9 @@ public class PictureController {
 
     /**
      * 图片审核
-     * @param pictureReviewRequest
-     * @param request
-     * @return
+     * @param pictureReviewRequest     图片审核请求
+     * @param request  请求
+     * @return   审核结果
      */
     @PostMapping("/review")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
@@ -273,6 +273,24 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         pictureService.doPictureReview(pictureReviewRequest, loginUser);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 批量抓取和创建图片（仅管理员可用）
+     * @param pictureUploadByBatchRequest 批量上传请求
+     * @param request 请求
+     * @return 成功创建的图片数量
+     */
+    @PostMapping("/upload/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Integer> uploadPictureByBatch(
+        @RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest,
+        HttpServletRequest request
+    ) {
+        ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
+        return ResultUtils.success(uploadCount);
     }
 
 
