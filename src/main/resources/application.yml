@@ -6,12 +6,25 @@ server:
 spring:
   application:
     name: picture-backend
+# 用于测试 redis操作
+#  profiles:
+#    active: local
+
   #数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/oyy_picture
     username: root
     password: root
+  # Redis配置
+  spring:
+    # Redis 配置
+    redis:
+      database: 0
+      host: 127.0.0.1
+      port: 6379
+      timeout: 5000
+
   servlet:
     # 开放更大的文件上传体积
     multipart:
