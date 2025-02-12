@@ -19,6 +19,8 @@ import com.bitzh.picturebackend.model.vo.PictureTagCategory;
 import com.bitzh.picturebackend.model.vo.PictureVO;
 import com.bitzh.picturebackend.service.PictureService;
 import com.bitzh.picturebackend.service.UserService;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -52,6 +54,18 @@ public class PictureController {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    /**
+     * 本地缓存
+     */
+    private final Cache<String, String> LOCAL_CACHE =
+        Caffeine.newBuilder().initialCapacity(1024)
+            .maximumSize(10000L) // 最大一万条
+            // 缓存 5 分钟移除
+            .expireAfterWrite(5L, TimeUnit.MINUTES)
+            .build();
+
+
 
     /**
      * 上传图片
@@ -232,10 +246,16 @@ public class PictureController {
         // 构建缓存 key
         String queryCondition = JSONUtil.toJsonStr(pictureQueryRequest);
         String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
-        String redisKey = "yupicture:listPictureVOByPage:" + hashKey;
+        // 构建 Redis 缓存 key （可以根据需要调整）
+        // String redisKey = "picture:listPictureVOByPage:" + hashKey;
+        // 构建本地缓存 key
+        String cacheKey = "picture:listPictureVOByPage:" + hashKey;
+        // 从本地缓存中查询
+        String cachedValue = LOCAL_CACHE.getIfPresent(cacheKey);
+
         // 从 Redis 缓存中查询
-        ValueOperations<String, String> valueOps = stringRedisTemplate.opsForValue();
-        String cachedValue = valueOps.get(redisKey);
+//        ValueOperations<String, String> valueOps = stringRedisTemplate.opsForValue();
+//        String cachedValue = valueOps.get(cacheKey);
         if (cachedValue != null) {
             // 如果缓存命中，返回结果
             Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
@@ -252,8 +272,10 @@ public class PictureController {
         String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
         // 5 - 10 分钟随机过期，防止雪崩
         int cacheExpireTime = 300 +  RandomUtil.randomInt(0, 300);
-        valueOps.set(redisKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
+        // valueOps.set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
 
+        // 存入本地缓存
+        LOCAL_CACHE.put(cacheKey, cacheValue);
         // 返回结果
         return ResultUtils.success(pictureVOPage);
     }
