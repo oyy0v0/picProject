@@ -250,31 +250,38 @@ public class PictureController {
         // String redisKey = "picture:listPictureVOByPage:" + hashKey;
         // 构建本地缓存 key
         String cacheKey = "picture:listPictureVOByPage:" + hashKey;
-        // 从本地缓存中查询
+        // 1、先本地缓存中查询
         String cachedValue = LOCAL_CACHE.getIfPresent(cacheKey);
-
-        // 从 Redis 缓存中查询
-//        ValueOperations<String, String> valueOps = stringRedisTemplate.opsForValue();
-//        String cachedValue = valueOps.get(cacheKey);
-        if (cachedValue != null) {
+        if(cachedValue != null) {
             // 如果缓存命中，返回结果
             Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
             return ResultUtils.success(cachedPage);
         }
 
-        // 查询数据库
+        // 2、如果本地缓存未命中，从 Redis 缓存中查询
+        ValueOperations<String, String> valueOps = stringRedisTemplate.opsForValue();
+        cachedValue = valueOps.get(cacheKey);
+        if (cachedValue != null) {
+            // 如果缓存命中，更新本地缓存，并返回结果
+            LOCAL_CACHE.put(cacheKey, cachedValue);
+            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
+            return ResultUtils.success(cachedPage);
+        }
+
+        // 3、查询数据库
         Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
             pictureService.getQueryWrapper(pictureQueryRequest));
         // 获取封装类
         Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage, request);
 
-        // 存入 Redis 缓存
+        // 4、更新缓存
+        // 更新 Redis 缓存
         String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
         // 5 - 10 分钟随机过期，防止雪崩
         int cacheExpireTime = 300 +  RandomUtil.randomInt(0, 300);
-        // valueOps.set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
+        valueOps.set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
 
-        // 存入本地缓存
+        // 更新本地缓存
         LOCAL_CACHE.put(cacheKey, cacheValue);
         // 返回结果
         return ResultUtils.success(pictureVOPage);
