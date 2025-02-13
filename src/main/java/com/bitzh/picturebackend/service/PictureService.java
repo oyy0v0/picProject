@@ -10,7 +10,6 @@ import com.bitzh.picturebackend.model.dto.picture.PictureUploadRequest;
 import com.bitzh.picturebackend.model.entity.Picture;
 import com.bitzh.picturebackend.model.entity.User;
 import com.bitzh.picturebackend.model.vo.PictureVO;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,10 +22,10 @@ public interface PictureService extends IService<Picture> {
     /**
      * 上传图片
      *
-     * @param multipartFile
-     * @param pictureUploadRequest
-     * @param loginUser
-     * @return
+     * @param inputSource 图片源
+     * @param pictureUploadRequest 上传请求
+     * @param loginUser 当前登录用户
+     * @return 图片
      */
     PictureVO uploadPicture(Object inputSource,
                             PictureUploadRequest pictureUploadRequest,
@@ -34,60 +33,66 @@ public interface PictureService extends IService<Picture> {
 
     /**
      * 获取查询条件
-     * @param pictureQueryRequest
-     * @return
+     * @param pictureQueryRequest 查询请求
+     * @return 查询条件
      */
     QueryWrapper<Picture> getQueryWrapper(PictureQueryRequest pictureQueryRequest);
 
 
     /**
      * 获取图片包装类（单条）
-     * @param picture
-     * @param request
-     * @return
+     * @param picture 图片
+     * @param request 请求
+     * @return 包装类
      */
     PictureVO getPictureVO(Picture picture, HttpServletRequest request);
 
     /**
      * 获取图片包装类（分页）
-     * @param picturePage
-     * @param request
-     * @return
+     * @param picturePage 分页
+     * @param request 请求
+     * @return 分页包装类
      */
     Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request);
 
     /**
      * 校验图片
-     * @param picture
+     * @param picture 待校验图片
      */
     void validPicture(Picture picture);
 
     /**
      * 图片审核
      *
-     * @param pictureReviewRequest
-     * @param loginUser
+     * @param pictureReviewRequest 审核请求
+     * @param loginUser 当前登录用户
      */
     void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
 
 
     /**
      * 填充审核参数
-     * @param picture
-     * @param loginUser
+     * @param picture 待审核图片
+     * @param loginUser 当前登录用户
      */
     void fillReviewParams(Picture picture, User loginUser);
 
     /**
      * 批量抓取和创建图片
      *
-     * @param pictureUploadByBatchRequest
-     * @param loginUser
+     * @param pictureUploadByBatchRequest 抓取图片请求
+     * @param loginUser 当前登录用户
      * @return 成功创建的图片数
      */
     Integer uploadPictureByBatch(
         PictureUploadByBatchRequest pictureUploadByBatchRequest,
         User loginUser
     );
+
+    /**
+     * 清除图片
+     * @param oldPicture 旧图片
+     */
+    void clearPictureFile(Picture oldPicture);
 
 }

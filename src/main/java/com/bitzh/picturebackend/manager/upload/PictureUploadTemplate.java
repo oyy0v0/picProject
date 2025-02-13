@@ -163,5 +163,7 @@ public abstract class PictureUploadTemplate {
             log.error("file delete error, filepath = {}", file.getAbsolutePath());
         }
     }
+
+
 }
 
