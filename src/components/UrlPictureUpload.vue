@@ -1,30 +1,24 @@
 <template>
   <div class="url-picture-upload">
-    <a-upload
-      list-type="picture-card"
-      :show-upload-list="false"
-      :custom-request="handleUpload"
-      :before-upload="beforeUpload"
-    >
-      <img v-if="picture?.url" :src="picture?.url" alt="avatar" />
-      <div v-else>
-        <loading-outlined v-if="loading"></loading-outlined>
-        <plus-outlined v-else></plus-outlined>
-        <div class="ant-upload-text">点击或拖拽上传图片</div>
-      </div>
-    </a-upload>
+    <a-input-group compact style="margin-bottom: 16px">
+      <a-input
+        v-model:value="fileUrl"
+        style="width: calc(100% - 120px)"
+        placeholder="请输入图片 URL"
+      />
+      <a-button type="primary" :loading="loading" @click="handleUpload" style="width: 120px"
+        >提交</a-button
+      >
+    </a-input-group>
+    <img v-if="picture?.url" :src="picture?.url" alt="avatar" />
   </div>
-
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { PlusOutlined, LoadingOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import type { UploadProps } from 'ant-design-vue'
-import { uploadPictureUsingPost } from '@/api/pictureController.ts'
-
-
-
+import { uploadPictureByUrlUsingPost} from '@/api/pictureController.ts'
 
 interface Props {
   picture?: API.PictureVO
@@ -32,17 +26,22 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+
 const loading = ref<boolean>(false)
+const fileUrl = ref<string>()
 
 /**
  * 上传
- * @param file
  */
-const handleUpload = async ({ file }: any) => {
+const handleUpload = async () => {
   loading.value = true
   try {
-    const params = props.picture ? { id: props.picture.id } : {}
-    const res = await uploadPictureUsingPost(params, {}, file)
+    const params: API.PictureUploadRequest = { fileUrl: fileUrl.value }
+    if (props.picture) {
+      params.id = props.picture.id
+    }
+    const res = await uploadPictureByUrlUsingPost(params)
     if (res.data.code === 0 && res.data.data) {
       message.success('图片上传成功')
       // 将上传成功的图片信息传递给父组件
@@ -98,5 +97,4 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
   margin-top: 8px;
   color: #666;
 }
-
 </style>

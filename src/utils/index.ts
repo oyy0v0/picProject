@@ -1,3 +1,5 @@
+import { saveAs } from 'file-saver'
+
 /**
  * 格式化文件大小
  * @param size
