@@ -78,6 +78,11 @@ const originItems = [
     title: '图片管理',
   },
   {
+    key: '/admin/spaceManage',
+    label: '空间管理',
+    title: '空间管理',
+  },
+  {
     key: 'others',
     label: h('a', { href: 'https://www.oyy0v0.top', target: '_blank' }, '博客'),
     title: '博客',
