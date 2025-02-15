@@ -3,10 +3,7 @@ package com.bitzh.picturebackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.bitzh.picturebackend.model.dto.picture.PictureQueryRequest;
-import com.bitzh.picturebackend.model.dto.picture.PictureReviewRequest;
-import com.bitzh.picturebackend.model.dto.picture.PictureUploadByBatchRequest;
-import com.bitzh.picturebackend.model.dto.picture.PictureUploadRequest;
+import com.bitzh.picturebackend.model.dto.picture.*;
 import com.bitzh.picturebackend.model.entity.Picture;
 import com.bitzh.picturebackend.model.entity.User;
 import com.bitzh.picturebackend.model.vo.PictureVO;
@@ -94,5 +91,26 @@ public interface PictureService extends IService<Picture> {
      * @param oldPicture 旧图片
      */
     void clearPictureFile(Picture oldPicture);
+
+    /**
+     * 删除图片
+     * @param pictureId 图片 id
+     * @param loginUser 当前登录用户
+     */
+    void deletePicture(long pictureId, User loginUser);
+
+    /**
+     * 编辑图片
+     * @param pictureEditRequest 编辑请求
+     * @param loginUser 当前登录用户
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 检查空间图片权限
+     * @param loginUser 当前登录用户
+     * @param picture 图片
+     */
+    void checkPictureAuth(User loginUser , Picture picture);
 
 }
