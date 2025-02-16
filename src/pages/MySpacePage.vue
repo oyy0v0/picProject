@@ -1,108 +1,47 @@
 <template>
-  <div id="mySpacePage">
-    <p>正在跳转，请稍后。。。。</p>
+  <div id="mySpace">
+    <p>正在跳转，请稍候...</p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import {
-  addSpaceUsingPost,
-  getSpaceVoByIdUsingGet,
-  listSpaceLevelUsingGet,
-  updateSpaceUsingPost
-} from '@/api/spaceController.ts'
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { listSpaceVoByPageUsingPost } from '@/api/spaceController'
 import { message } from 'ant-design-vue'
-import { SPACE_LEVEL_OPTIONS } from '@/constans/space.ts'
-import { formatSize } from '../utils'
-
-const spaceForm = reactive<API.SpaceAddRequest | API.SpaceEditRequest>({})
-const loading = ref<boolean>(false);
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
 
 const router = useRouter()
+const loginUserStore = useLoginUserStore()
 
-/**
- * 提交表单
- * @param values
- */
-const handleSubmit = async (values: any) => {
-  const spaceId = space.value?.id
-  loading.value = true
-  let res
-  // 更新
-  if (spaceId) {
-    res = await updateSpaceUsingPost({
-      id: spaceId,
-      ...spaceForm,
-    })
-  } else {
-    // 创建
-    res = await addSpaceUsingPost({
-      ...spaceForm,
-    })
+// 检查用户是否有个人空间
+const checkUserSpace = async () => {
+  const loginUser = loginUserStore.loginUser
+  if (!loginUser?.id) {
+    router.replace('/user/login')
+    return
   }
-  if (res.data.code === 0 && res.data.data) {
-    message.success('操作成功')
-    let path = `/space/${spaceId ?? res.data.data}`
-    router.push({
-      path,
-    })
-  } else {
-    message.error('操作失败，' + res.data.message)
-  }
-  loading.value = false
-}
-
-
-// 获取路由参数
-const route = useRoute()
-const space = ref<API.SpaceVO>()
-
-// 获取老数据
-const getOldSpace = async () => {
-  // 获取数据
-  const id = route.query?.id
-  if (id) {
-    const res = await getSpaceVoByIdUsingGet({
-      id: id,
-    })
-    if (res.data.code === 0 && res.data.data) {
-      const data = res.data.data
-      space.value = data
-      spaceForm.spaceName = data.spaceName
-      spaceForm.spaceLevel = data.spaceLevel
+  // 获取用户空间信息
+  const res = await listSpaceVoByPageUsingPost({
+    userId: loginUser.id,
+    current: 1,
+    pageSize: 1,
+  })
+  if (res.data.code === 0) {
+    if (res.data.data?.records?.length > 0) {
+      const space = res.data.data.records[0]
+      router.replace(`/space/${space.id}`)
+    } else {
+      router.replace('/add_space')
+      message.warn('请先创建空间')
     }
-  }
-}
-
-// 页面加载时，请求老数据
-onMounted(() => {
-  getOldSpace()
-})
-
-
-const spaceLevelList = ref<API.SpaceLevel[]>([])
-
-// 获取空间级别
-const fetchSpaceLevelList = async () => {
-  const res = await listSpaceLevelUsingGet()
-  if (res.data.code === 0 && res.data.data) {
-    spaceLevelList.value = res.data.data
   } else {
-    message.error('加载空间级别失败，' + res.data.message)
+    message.error('加载我的空间失败，' + res.data.message)
   }
 }
 
+// 在页面加载时检查用户空间
 onMounted(() => {
-  fetchSpaceLevelList()
+  checkUserSpace()
 })
-
 </script>
-
-<style scoped>
-#addSpacePage {
-  max-width: 720px;
-  margin: 0 auto;
-}
-</style>
