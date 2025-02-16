@@ -77,6 +77,10 @@ const onSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
   pictureForm.name = newPicture.name
 }
+// 空间 id
+const spaceId = computed(() => {
+  return route.query?.spaceId
+})
 
 const router = useRouter()
 
