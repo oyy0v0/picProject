@@ -24,19 +24,34 @@
         </a-button>
       </a-form-item>
     </a-form>
+    <a-card title="空间级别介绍">
+      <a-typography-paragraph>
+        * 目前仅支持开通普通版，如需升级空间，请联系
+        <a href="https://oyy0v0.top" target="_blank">oyy0v0</a>。
+      </a-typography-paragraph>
+      <a-typography-paragraph v-for="spaceLevel in spaceLevelList">
+        {{ spaceLevel.text }}： 大小 {{ formatSize(spaceLevel.maxSize) }}， 数量
+        {{ spaceLevel.maxCount }}
+      </a-typography-paragraph>
+    </a-card>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { editSpaceUsingPost, getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
+import {
+  addSpaceUsingPost,
+  getSpaceVoByIdUsingGet,
+  listSpaceLevelUsingGet,
+  updateSpaceUsingPost
+} from '@/api/spaceController.ts'
 import { message } from 'ant-design-vue'
 import { SPACE_LEVEL_OPTIONS } from '@/constans/space.ts'
+import { formatSize } from '../utils'
 
-const spaceForm = reactive<API.SpaceAddRequest>({})
-const space = ref<API.SpaceVO>()
-
+const spaceForm = reactive<API.SpaceAddRequest | API.SpaceEditRequest>({})
 const loading = ref<boolean>(false);
 
 const router = useRouter()
@@ -46,27 +61,37 @@ const router = useRouter()
  * @param values
  */
 const handleSubmit = async (values: any) => {
-  const spaceId = space.value.id
-  if (!spaceId) {
-    return
-  }
-  const res = await editSpaceUsingPost({
-    id: spaceId,
-    ...values,
-  })
-  if (res.data.code === 0 && res.data.data) {
-    message.success('创建成功')
-    // 跳转到空间详情页
-    router.push({
-      path: `/space/${spaceId}`,
+  const spaceId = space.value?.id
+  loading.value = true
+  let res
+  // 更新
+  if (spaceId) {
+    res = await updateSpaceUsingPost({
+      id: spaceId,
+      ...spaceForm,
     })
   } else {
-    message.error('创建失败，' + res.data.message)
+    // 创建
+    res = await addSpaceUsingPost({
+      ...spaceForm,
+    })
   }
+  if (res.data.code === 0 && res.data.data) {
+    message.success('操作成功')
+    let path = `/space/${spaceId ?? res.data.data}`
+    router.push({
+      path,
+    })
+  } else {
+    message.error('操作失败，' + res.data.message)
+  }
+  loading.value = false
 }
+
 
 // 获取路由参数
 const route = useRoute()
+const space = ref<API.SpaceVO>()
 
 // 获取老数据
 const getOldSpace = async () => {
@@ -79,17 +104,34 @@ const getOldSpace = async () => {
     if (res.data.code === 0 && res.data.data) {
       const data = res.data.data
       space.value = data
-      spaceForm.name = data.name
-      spaceForm.introduction = data.introduction
-      spaceForm.category = data.category
-      spaceForm.tags = data.tags
+      spaceForm.spaceName = data.spaceName
+      spaceForm.spaceLevel = data.spaceLevel
     }
   }
 }
 
+// 页面加载时，请求老数据
 onMounted(() => {
   getOldSpace()
 })
+
+
+const spaceLevelList = ref<API.SpaceLevel[]>([])
+
+// 获取空间级别
+const fetchSpaceLevelList = async () => {
+  const res = await listSpaceLevelUsingGet()
+  if (res.data.code === 0 && res.data.data) {
+    spaceLevelList.value = res.data.data
+  } else {
+    message.error('加载空间级别失败，' + res.data.message)
+  }
+}
+
+onMounted(() => {
+  fetchSpaceLevelList()
+})
+
 </script>
 
 <style scoped>
