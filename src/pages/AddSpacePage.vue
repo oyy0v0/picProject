@@ -83,7 +83,7 @@ const handleSubmit = async (values: any) => {
       path,
     })
   } else {
-    message.error('操作失败，' + res.data.message)
+    message.error('操作失败，' + res.data.data)
   }
   loading.value = false
 }
