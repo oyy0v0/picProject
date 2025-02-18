@@ -185,6 +185,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             }
             return picture;
         });
+
+
+
+
+
         return PictureVO.objToVo(picture);
     }
 
@@ -204,11 +209,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Integer picWidth = pictureQueryRequest.getPicWidth();
         Integer picHeight = pictureQueryRequest.getPicHeight();
         Double picScale = pictureQueryRequest.getPicScale();
+        Long spaceId = pictureQueryRequest.getSpaceId();
+        boolean nullSpaceId = pictureQueryRequest.isNullSpaceId();
         String picFormat = pictureQueryRequest.getPicFormat();
         String searchText = pictureQueryRequest.getSearchText();
         Long userId = pictureQueryRequest.getUserId();
-        Long spaceId = pictureQueryRequest.getSpaceId();
-        boolean nullSpaceId = pictureQueryRequest.isNullSpaceId();
         String sortField = pictureQueryRequest.getSortField();
         String sortOrder = pictureQueryRequest.getSortOrder();
 
@@ -229,7 +234,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         queryWrapper.eq(ObjUtil.isNotEmpty(userId), "userId", userId);
         queryWrapper.eq(ObjUtil.isNotEmpty(spaceId), "spaceId", spaceId);
 
-        queryWrapper.isNull(nullSpaceId, "spaceId");
+        queryWrapper.isNull(nullSpaceId, "nullSpaceId");
 
         queryWrapper.like(StrUtil.isNotBlank(name), "name", name);
         queryWrapper.like(StrUtil.isNotBlank(introduction), "introduction", introduction);
