@@ -113,6 +113,7 @@
         </template>
       </template>
     </a-table>
+    <div style="padding-top: 100px"></div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -210,9 +211,11 @@ const doTableChange = (page: any) => {
 
 // 获取数据
 const fetchData = async () => {
+
   try {
     const res = await listPictureByPageUsingPost({
       ...searchParams,
+      nullSpaceId: true,
     })
 
     if (res.data.code === 0 && res.data.data) {

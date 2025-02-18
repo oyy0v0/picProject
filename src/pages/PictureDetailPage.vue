@@ -132,7 +132,13 @@ const doDownload = () => {
 
 // 编辑
 const doEdit = () => {
-  router.push('/add_picture?id=' + picture.value.id)
+  router.push({
+    path: `/add_picture`,
+    query:{
+      id: picture.value.id,
+      spaceId: picture.value.spaceId,
+    },
+  })
 }
 // 删除
 const doDelete = async () => {

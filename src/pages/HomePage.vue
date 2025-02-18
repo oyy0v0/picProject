@@ -33,13 +33,14 @@
     <!-- 图片列表 -->
     <PictureList :dataList="dataList" :loading="loading" />
     <a-pagination
-      style="text-align: center"
+      style="text-align: center;"
       v-model:current="searchParams.current"
       v-model:pageSize="searchParams.pageSize"
       :total="total"
       @change="onPageChange"
       simple
     />
+    <div style="padding-top: 100px"></div>
   </div>
 </template>
 
@@ -130,6 +131,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+#homePage{
+
+}
 #homePage .search-bar {
   max-width: 480px;
   margin: 0 auto 16px;

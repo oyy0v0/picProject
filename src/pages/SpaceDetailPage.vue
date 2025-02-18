@@ -19,7 +19,7 @@
       </a-space>
     </a-flex>
     <!-- 图片列表 -->
-    <PictureList :dataList="dataList" :loading="loading" />
+    <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData"/>
     <a-pagination
       style="text-align: center"
       v-model:current="searchParams.current"
@@ -30,6 +30,7 @@
     />
 
   </div>
+  <div style="padding-top: 100px"></div>
 </template>
 
 <script setup lang="ts">
@@ -37,7 +38,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import { formatSize } from '@/utils'
-import { listPictureTagCategoryUsingGet, listPictureVoByPageUsingPost } from '@/api/pictureController.ts'
+import {  listPictureVoByPageUsingPost } from '@/api/pictureController.ts'
 import PictureList from '@/components/PictureList.vue'
 
 interface Props {
