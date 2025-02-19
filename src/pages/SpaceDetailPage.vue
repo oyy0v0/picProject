@@ -18,6 +18,9 @@
         </a-tooltip>
       </a-space>
     </a-flex>
+    <div style="margin-bottom: 16px" />
+    <!-- 搜索表单 -->
+    <PictureSearchForm/>
     <!-- 图片列表 -->
     <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData"/>
     <a-pagination
@@ -40,6 +43,7 @@ import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import { formatSize } from '@/utils'
 import {  listPictureVoByPageUsingPost } from '@/api/pictureController.ts'
 import PictureList from '@/components/PictureList.vue'
+import PictureSearchForm from '@/components/PictureSearchForm.vue'
 
 interface Props {
   id: string | number
