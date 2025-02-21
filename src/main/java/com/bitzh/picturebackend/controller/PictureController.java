@@ -71,12 +71,12 @@ public class PictureController {
             .build();
 
 
-
     /**
      * 上传图片
-     * @param multipartFile 图片
-     * @param pictureUploadRequest  请求
-     * @param request 请求
+     *
+     * @param multipartFile        图片
+     * @param pictureUploadRequest 请求
+     * @param request              请求
      * @return 图片
      */
     @PostMapping("/upload")
@@ -105,8 +105,9 @@ public class PictureController {
 
     /**
      * 删除图片
+     *
      * @param deleteRequest 删除请求
-     * @param request 请求
+     * @param request       请求
      * @return 是否成功
      */
     @PostMapping("/delete")
@@ -122,13 +123,14 @@ public class PictureController {
 
     /**
      * 更新图片（仅管理员可用）
+     *
      * @param pictureUpdateRequest 图片更新请求
-     * @param request 请求
+     * @param request              请求
      * @return 是否成功
      */
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updatePicture(@RequestBody PictureUpdateRequest pictureUpdateRequest,HttpServletRequest request) {
+    public BaseResponse<Boolean> updatePicture(@RequestBody PictureUpdateRequest pictureUpdateRequest, HttpServletRequest request) {
         if (pictureUpdateRequest == null || pictureUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -154,6 +156,7 @@ public class PictureController {
 
     /**
      * 根据 id 获取图片（仅管理员可用）
+     *
      * @param id 图片 id
      * @return 图片
      */
@@ -170,7 +173,8 @@ public class PictureController {
 
     /**
      * 根据 id 获取图片（封装类）
-     * @param id 图片 id
+     *
+     * @param id      图片 id
      * @param request 请求
      * @return 图片
      */
@@ -182,7 +186,7 @@ public class PictureController {
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
         //空间权限校验
         Long spaceId = picture.getSpaceId();
-        if(spaceId != null) {
+        if (spaceId != null) {
             User loginUser = userService.getLoginUser(request);
             pictureService.checkPictureAuth(loginUser, picture);
         }
@@ -192,6 +196,7 @@ public class PictureController {
 
     /**
      * 分页获取图片列表（仅管理员可用）
+     *
      * @param pictureQueryRequest 图片查询请求
      * @return 分页图片列表
      */
@@ -208,8 +213,9 @@ public class PictureController {
 
     /**
      * 分页获取图片列表（封装类）
+     *
      * @param pictureQueryRequest 图片查询请求
-     * @param request 请求
+     * @param request             请求
      * @return 分页图片列表
      */
     @PostMapping("/list/page/vo")
@@ -246,8 +252,9 @@ public class PictureController {
 
     /**
      * 分页获取图片列表（封装类，有缓存）
+     *
      * @param pictureQueryRequest 图片查询请求
-     * @param request 请求
+     * @param request             请求
      * @return 分页图片列表
      */
     @Deprecated
@@ -270,7 +277,7 @@ public class PictureController {
         String cacheKey = "picture:listPictureVOByPage:" + hashKey;
         // 1、先本地缓存中查询
         String cachedValue = LOCAL_CACHE.getIfPresent(cacheKey);
-        if(cachedValue != null) {
+        if (cachedValue != null) {
             // 如果缓存命中，返回结果
             Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
             return ResultUtils.success(cachedPage);
@@ -296,7 +303,7 @@ public class PictureController {
         // 更新 Redis 缓存
         String cacheValue = JSONUtil.toJsonStr(pictureVOPage);
         // 5 - 10 分钟随机过期，防止雪崩
-        int cacheExpireTime = 300 +  RandomUtil.randomInt(0, 300);
+        int cacheExpireTime = 300 + RandomUtil.randomInt(0, 300);
         valueOps.set(cacheKey, cacheValue, cacheExpireTime, TimeUnit.SECONDS);
 
         // 更新本地缓存
@@ -306,11 +313,11 @@ public class PictureController {
     }
 
 
-
     /**
      * 编辑图片（给用户使用）
+     *
      * @param pictureEditRequest 图片编辑请求
-     * @param request 请求
+     * @param request            请求
      * @return 编辑结果
      */
     @PostMapping("/edit")
@@ -325,6 +332,7 @@ public class PictureController {
 
     /**
      * 获取图片标签分类
+     *
      * @return 图片标签分类
      */
     @GetMapping("/tag_category")
@@ -339,9 +347,10 @@ public class PictureController {
 
     /**
      * 图片审核
-     * @param pictureReviewRequest     图片审核请求
-     * @param request  请求
-     * @return   审核结果
+     *
+     * @param pictureReviewRequest 图片审核请求
+     * @param request              请求
+     * @return 审核结果
      */
     @PostMapping("/review")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
@@ -355,8 +364,9 @@ public class PictureController {
 
     /**
      * 批量抓取和创建图片（仅管理员可用）
+     *
      * @param pictureUploadByBatchRequest 批量上传请求
-     * @param request 请求
+     * @param request                     请求
      * @return 成功创建的图片数量
      */
     @PostMapping("/upload/batch")
@@ -369,6 +379,23 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
         return ResultUtils.success(uploadCount);
+    }
+
+    /**
+     * 根据颜色搜索图片
+     *
+     * @param searchPictureByColorRequest 搜索图片请求
+     * @param request                     请求
+     * @return 搜索结果
+     */
+    @PostMapping("/search/color")
+    public BaseResponse<List<PictureVO>> searchPictureByColor(@RequestBody SearchPictureByColorRequest searchPictureByColorRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(searchPictureByColorRequest == null, ErrorCode.PARAMS_ERROR);
+        String picColor = searchPictureByColorRequest.getPicColor();
+        Long spaceId = searchPictureByColorRequest.getSpaceId();
+        User loginUser = userService.getLoginUser(request);
+        List<PictureVO> result = pictureService.searchPictureByColor(spaceId, picColor, loginUser);
+        return ResultUtils.success(result);
     }
 
 
