@@ -121,6 +121,6 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser 当前登录用户
      * @return 图片列表
      */
-    List<PictureVO> searchPictureByColor(Long spaceId, String picColor, User loginUser)
+    List<PictureVO> searchPictureByColor(Long spaceId, String picColor, User loginUser);
 
 }
