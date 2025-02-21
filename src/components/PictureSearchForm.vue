@@ -71,28 +71,23 @@
                 allow-clear
               />
             </a-form-item>
+
+
           </a-form>
         </a-collapse-panel>
       </a-collapse>
-
-
-
-
-
-
-
-
     </a-form>
   </div>
 </template>
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from 'vue'
 
-import { PIC_REVIEW_STATUS_OPTIONS } from '@/constans/picture.ts'
+
 import dayjs from 'dayjs'
-import { listPictureTagCategoryUsingGet } from '@/api/pictureController.ts'
+import { listPictureTagCategoryUsingGet, searchPictureByColorUsingPost } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 import PictureQueryRequest = API.PictureQueryRequest
+
 
 interface Props {
   onSearch?: (searchParams: PictureQueryRequest) => void
