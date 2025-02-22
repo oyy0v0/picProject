@@ -71,6 +71,13 @@
               </template>
             </a-button>
 
+            <a-button type="primary" ghost @click="doShare">
+              分享
+              <template #icon>
+                <ShareAltOutlined />
+              </template>
+            </a-button>
+
             <a-button v-if="canEdit" type="default" @click="doEdit">
               编辑
               <template #icon>
@@ -88,7 +95,7 @@
         </a-card>
       </a-col>
     </a-row>
-
+    <ShareModal ref="shareModalRef" :link="shareLink" />
   </div>
 </template>
 
@@ -100,6 +107,7 @@ import { deletePictureUsingPost, getPictureVoByIdUsingGet } from '@/api/pictureC
 import { downloadImage, formatSize, toHexColor } from '@/utils'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import router from '@/router'
+import ShareModal from '@/components/ShareModal.vue'
 
 interface Props {
   id: string | number
@@ -169,6 +177,19 @@ const doDelete = async () => {
 onMounted(() => {
   fetchPictureDetail()
 })
+
+// 分享弹窗引用
+const shareModalRef = ref()
+// 分享链接
+const shareLink = ref<string>()
+
+// 分享
+const doShare = () => {
+  shareLink.value = `${window.location.protocol}//${window.location.host}/picture/${picture.value.id}`
+  if (shareModalRef.value) {
+    shareModalRef.value.openModal()
+  }
+}
 
 
 </script>
