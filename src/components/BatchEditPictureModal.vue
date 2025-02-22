@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, withDefaults, defineExpose, reactive, onMounted } from 'vue'
+import {  ref,  reactive, onMounted } from 'vue'
 import {
   editPictureByBatchUsingPost,
   listPictureTagCategoryUsingGet,
